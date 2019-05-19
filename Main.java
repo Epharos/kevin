@@ -1,9 +1,18 @@
 package fr.epharos;
 
+import java.util.Scanner;
+
 public class Main 
 {
 	public static void main(String[] args)
-	{
+	{		
+		freq.load();
+		
+		if(freq.getLoaded("frequency") != null)
+			frequency = Long.valueOf(freq.getLoaded("frequency"));
+		
+		frequency("keke");
+		
 		System.out.println("Hello World!");
 		
 		Saver s = new Saver("test.dat"); //Création de l'instance d'un Saver
@@ -30,7 +39,7 @@ public class Main
 				
 				for(;;) //boucle infinie qui n'affectera pas le thread principal donc qui ne bloquera rien
 				{					
-					if(System.currentTimeMillis() - ls >= 5000) //s'il s'est passé 60 secondes entre maintenant et la dernière sauvegarde
+					if(System.currentTimeMillis() - ls >= frequency * 1000) //s'il s'est passé 60 secondes entre maintenant et la dernière sauvegarde
 					{
 						ls = System.currentTimeMillis(); //alors on refresh le compteur
 						sb.clear(); //on clear notre saver pour pas enregistrer 4651651 fois les mêmes valeurs
@@ -43,5 +52,33 @@ public class Main
 		
 		Thread t = new Thread(r);
 		t.start(); //et on pense bien à lancer le thread !
+	}
+	
+	static long frequency = 60;
+	static Saver freq = new Saver("frequency.dat");
+	
+	public static void frequency(String password) //évidemment là je met le mot de passe en argument, mais toi tu l'encrypte en SHA256 et tu le fous en dur dans le code
+	{
+		System.out.println("Current frequency : " + frequency + " second(s)");
+		
+		String p = "";
+		Scanner sc = new Scanner(System.in);
+		
+		while(!p.equals(password))
+		{
+			System.out.print("Enter password to change frequency of saving : ");
+			p = sc.nextLine();
+			
+			if(p.equals("quit"))
+				return;
+		}
+		
+		System.out.println("Enter the new frequency : ");
+		long nf = sc.nextLong();
+		
+		frequency = nf;
+		freq.addToSaver("frequency", frequency);
+		freq.save();
+		freq.clear();
 	}
 }
